@@ -61,7 +61,7 @@ interface Props {
   apiLimit: number;
   isPro?: boolean;
 }
-const Sidebar = ({ apiLimit }: Props) => {
+const Sidebar = ({ apiLimit, isPro = false }: Props) => {
   const pathname = usePathname();
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
@@ -75,7 +75,7 @@ const Sidebar = ({ apiLimit }: Props) => {
               alt="
               Logo"
             />
-            <span className={cn("text-xl font-bold", montserrat.className)}>Genius</span>
+            <span className={cn("text-xl font-bold", montserrat.className)}>Intelligent</span>
           </div>
         </Link>
         <div className="space-y-2 mt-5">
@@ -94,7 +94,7 @@ const Sidebar = ({ apiLimit }: Props) => {
           ))}
         </div>
       </div>
-      <FreeCounter apiLimit={apiLimit} isPro={false} />
+      <FreeCounter apiLimit={apiLimit} isPro={isPro} />
     </div>
   );
 };

@@ -6,15 +6,16 @@ import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useProModal } from "@/hooks/use-pro-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
-import { useProModal } from "@/hooks/use-pro-modal";
 
 const VideoPage = () => {
   const router = useRouter();
@@ -38,6 +39,8 @@ const VideoPage = () => {
     } catch (error: any) {
       if (error.response.status === 403) {
         proModal.openModal();
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();

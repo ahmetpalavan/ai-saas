@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
 import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 const MusicPage = () => {
   const router = useRouter();
@@ -38,6 +39,8 @@ const MusicPage = () => {
     } catch (error: any) {
       if (error.response.status === 403) {
         proModal.openModal();
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();

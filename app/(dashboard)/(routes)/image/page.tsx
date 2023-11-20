@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { amountOptions, formSchema, resolutionOptions } from "./constants";
 import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 const ImagePage = () => {
   const router = useRouter();
@@ -39,12 +40,15 @@ const ImagePage = () => {
     try {
       setPhotos([]);
       const response = await axios.post("/api/image", values);
+      console.log("🚀 ~ file: page.tsx:42 ~ onSubmit ~ response:", response)
       const url = response.data.map((photo: any) => photo.url);
       setPhotos(url);
       form.reset();
     } catch (error: any) {
       if (error.response.status === 403) {
         proModal.openModal();
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();

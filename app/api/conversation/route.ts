@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -26,8 +27,9 @@ export async function POST(req: Request) {
     }
 
     const isAllowed = await checkApiLimit();
+    const isPro = await checkSubscription();
 
-    if (!isAllowed) {
+    if (!isAllowed && !isPro) {
       return new NextResponse("Api limit reached", { status: 403 });
     }
 
@@ -37,8 +39,10 @@ export async function POST(req: Request) {
       model: "gpt-3.5-turbo-instruct",
       prompt: message,
     });
-    
-    await increaseApiLimit();
+
+    if (!isPro) {
+      await increaseApiLimit();
+    }
 
     return NextResponse.json(response.choices[0].text);
   } catch (error) {

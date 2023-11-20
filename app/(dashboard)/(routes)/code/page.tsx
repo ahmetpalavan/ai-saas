@@ -20,6 +20,7 @@ import { z } from "zod";
 import { conversationSchema } from "./constants";
 import ReeactMarkdown from "react-markdown";
 import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 const CodePage = () => {
   const router = useRouter();
@@ -48,6 +49,8 @@ const CodePage = () => {
     } catch (error: any) {
       if (error.response.status === 403) {
         proModal.openModal();
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();
@@ -61,7 +64,7 @@ const CodePage = () => {
         description="Ask questions about code and get answers from the OpenAI Codex model"
         icon={Code}
         iconColor="text-green-700"
-        bgColor= "bg-green-700/10"
+        bgColor="bg-green-700/10"
       />
       <div className="px-4 lg:px-8">
         <div>
@@ -89,7 +92,7 @@ const CodePage = () => {
                       <Input
                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                         disabled={isLoading}
-                        placeholder="Simple toggle button using react hooks." 
+                        placeholder="Simple toggle button using react hooks."
                         {...field}
                       />
                     </FormControl>
@@ -119,16 +122,17 @@ const CodePage = () => {
                 )}
               >
                 {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                <ReeactMarkdown components={{
-                  pre: ({ node, ...props }) => (
-                    <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
-                      <pre {...props} />
-                    </div>
-                  ),
-                  code: ({ node, ...props }) => (
-                    <code className="bg-black/10 rounded-lg p-1" {...props} />
-                  )
-                }} className="text-sm overflow-hidden leading-7">
+                <ReeactMarkdown
+                  components={{
+                    pre: ({ node, ...props }) => (
+                      <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                        <pre {...props} />
+                      </div>
+                    ),
+                    code: ({ node, ...props }) => <code className="bg-black/10 rounded-lg p-1" {...props} />,
+                  }}
+                  className="text-sm overflow-hidden leading-7"
+                >
                   {message.content || ""}
                 </ReeactMarkdown>
               </div>

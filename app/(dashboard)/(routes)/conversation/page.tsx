@@ -19,6 +19,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
+import toast from "react-hot-toast";
 
 const Conversation = () => {
   const router = useRouter();
@@ -48,6 +49,8 @@ const Conversation = () => {
     } catch (error: any) {
       if (error.response.status === 403) {
         proModal.openModal();
+      } else {
+        toast.error("Something went wrong. Please try again.")
       }
     } finally {
       router.refresh();
