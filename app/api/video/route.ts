@@ -1,32 +1,28 @@
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import Replicate from "replicate";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
 });
 
 export async function POST(req: Request) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { prompt, amount = 1, resolution = "512x512" } = body;
-
-    if (!prompt) {
-      return new NextResponse("Prompt is required", { status: 400 });
-    }
+    const { prompt } = body;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!amount) {
-      return new NextResponse("Amount is required", { status: 400 });
+    if (!replicate.auth) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!resolution) {
-      return new NextResponse("Resolution is required", { status: 400 });
+    if (!prompt) {
+      return new NextResponse("Prompt is required", { status: 400 });
     }
 
     const isAllowed = await checkApiLimit();
@@ -35,15 +31,15 @@ export async function POST(req: Request) {
       return new NextResponse("Api limit reached", { status: 429 });
     }
 
-    const images = await openai.images.generate({
-      prompt,
-      n: parseInt(amount),
-      size: resolution,
+    const response = await replicate.run("anotherjesse/zeroscope-v2-xl:71996d331e8ede8ef7bd76eba9fae076d31792e4ddf4ad057779b443d6aea62f", {
+      input: {
+        prompt,
+      },
     });
 
     await increaseApiLimit();
 
-    return NextResponse.json(images.data);
+    return NextResponse.json(response);
   } catch (error) {
     console.log(["error", error]);
     return new NextResponse("Something went wrong", { status: 500 });

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -26,6 +27,12 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const isAllowed = await checkApiLimit();
+
+    if (!isAllowed) {
+      return new NextResponse("Api limit reached", { status: 429 });
+    }
+
     if (!messages) {
       return new NextResponse("Message is required", { status: 400 });
     }
@@ -34,6 +41,8 @@ export async function POST(req: Request) {
       model: "gpt-3.5-turbo-instruct",
       prompt: [instructionMessage, ...messages].map((message) => message.content).join("\n"),
     });
+
+    await increaseApiLimit();
 
     return NextResponse.json(response.choices[0].text);
   } catch (error) {
