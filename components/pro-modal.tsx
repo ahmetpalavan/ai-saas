@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { Badge } from "./ui/badge";
@@ -7,9 +7,23 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Check, Zap } from "lucide-react";
 import { Button } from "./ui/button";
+import axios from "axios";
 
 const ProModal = () => {
-  const { closeModal, isOpen, openModal } = useProModal();
+  const { closeModal, isOpen } = useProModal();
+  const [loading, setLoading] = useState(false);
+  const onSubscribe = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/stripe");
+      console.log("🚀 ~ file: pro-modal.tsx:18 ~ onSubscribe ~ response:", response);
+      window.location.href = (await response.data).url;
+    } catch (error) {
+      console.log("🚀 ~ file: pro-modal.tsx:22 ~ onSubscribe ~ error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent>
@@ -37,7 +51,7 @@ const ProModal = () => {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button size="lg" variant="premium" className="w-full">
+          <Button disabled={loading} onClick={onSubscribe} size="lg" variant="premium" className="w-full">
             Upgrade
             <Zap className="w-4 h-4 ml-2 fill-white" />
           </Button>
