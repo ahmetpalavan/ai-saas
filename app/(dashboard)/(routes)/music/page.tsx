@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const MusicPage = () => {
   const router = useRouter();
@@ -25,6 +26,8 @@ const MusicPage = () => {
 
   const isLoading = form.formState.isSubmitting;
 
+  const proModal = useProModal();
+
   const onSubmit = async (values: z.infer<typeof conversationSchema>) => {
     try {
       setMusic(undefined);
@@ -33,7 +36,9 @@ const MusicPage = () => {
       setMusic(response.data.audio);
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error.response.status === 403) {
+        proModal.openModal();
+      }
     } finally {
       router.refresh();
     }

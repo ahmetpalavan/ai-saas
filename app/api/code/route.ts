@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const isAllowed = await checkApiLimit();
 
     if (!isAllowed) {
-      return new NextResponse("Api limit reached", { status: 429 });
+      return new NextResponse("Api limit reached", { status: 403 });
     }
 
     if (!messages) {

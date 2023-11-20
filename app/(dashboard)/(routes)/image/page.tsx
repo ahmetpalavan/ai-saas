@@ -1,26 +1,23 @@
 "use client";
 
-import BotAvatar from "@/components/bot-avatar";
 import { Empty } from "@/components/empty";
 import { Heading } from "@/components/heading";
 import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import UserAvatar from "@/components/user-avatar";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Download, ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import ReeactMarkdown from "react-markdown";
 import { z } from "zod";
 import { amountOptions, formSchema, resolutionOptions } from "./constants";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Image from "next/image";
-import { Card, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ImagePage = () => {
   const router = useRouter();
@@ -36,6 +33,8 @@ const ImagePage = () => {
 
   const isLoading = form.formState.isSubmitting;
 
+  const proModal = useProModal();
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setPhotos([]);
@@ -43,8 +42,10 @@ const ImagePage = () => {
       const url = response.data.map((photo: any) => photo.url);
       setPhotos(url);
       form.reset();
-    } catch (error) {
-      console.log(error, "error");
+    } catch (error: any) {
+      if (error.response.status === 403) {
+        proModal.openModal();
+      }
     } finally {
       router.refresh();
     }

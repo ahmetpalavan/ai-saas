@@ -8,12 +8,13 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Music, Video } from "lucide-react";
+import { Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const VideoPage = () => {
   const router = useRouter();
@@ -25,6 +26,8 @@ const VideoPage = () => {
 
   const isLoading = form.formState.isSubmitting;
 
+  const proModal = useProModal();
+
   const onSubmit = async (values: z.infer<typeof conversationSchema>) => {
     try {
       setVideo(undefined);
@@ -33,7 +36,9 @@ const VideoPage = () => {
       setVideo(response.data);
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error.response.status === 403) {
+        proModal.openModal();
+      }
     } finally {
       router.refresh();
     }

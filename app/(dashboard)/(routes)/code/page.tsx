@@ -19,10 +19,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
 import ReeactMarkdown from "react-markdown";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const CodePage = () => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
+  const proModal = useProModal();
   const form = useForm<z.infer<typeof conversationSchema>>({
     resolver: zodResolver(conversationSchema),
     defaultValues: { prompt: "" },
@@ -44,7 +46,9 @@ const CodePage = () => {
 
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error.response.status === 403) {
+        proModal.openModal();
+      }
     } finally {
       router.refresh();
     }

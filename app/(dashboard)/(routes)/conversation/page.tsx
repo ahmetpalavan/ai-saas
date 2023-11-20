@@ -1,10 +1,14 @@
 "use client";
 
+import BotAvatar from "@/components/bot-avatar";
 import { Empty } from "@/components/empty";
 import { Heading } from "@/components/heading";
+import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import UserAvatar from "@/components/user-avatar";
+import { useProModal } from "@/hooks/use-pro-modal";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -15,9 +19,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { conversationSchema } from "./constants";
-import { Loader } from "@/components/loader";
-import UserAvatar from "@/components/user-avatar";
-import BotAvatar from "@/components/bot-avatar";
 
 const Conversation = () => {
   const router = useRouter();
@@ -26,6 +27,8 @@ const Conversation = () => {
     resolver: zodResolver(conversationSchema),
     defaultValues: { prompt: "" },
   });
+
+  const proModal = useProModal();
 
   const isLoading = form.formState.isSubmitting;
 
@@ -43,7 +46,9 @@ const Conversation = () => {
 
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error.response.status === 403) {
+        proModal.openModal();
+      }
     } finally {
       router.refresh();
     }
